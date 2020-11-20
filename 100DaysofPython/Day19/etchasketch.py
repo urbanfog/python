@@ -21,10 +21,14 @@ def left():
     turd.left(15)
 
 
+def clear():
+    turd.clear()
+
+
 screen.onkeypress(key="w", fun=forward)
 screen.onkeypress(key="s", fun=back)
 screen.onkeypress(key="d", fun=right)
 screen.onkeypress(key="a", fun=left)
-
+screen.onkeypress(key="c", fun=clear)
 
 screen.exitonclick()
