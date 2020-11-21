@@ -27,9 +27,11 @@ screen.onkey(snake.right, "Right")
 
 time.sleep(3)
 print(game_is_on)
+snake_speed = 0.1
+
 while game_is_on:
     screen.update()
-    time.sleep(0.1)
+    time.sleep(snake_speed)
     snake.move()
 
     if snake.head.distance(food) < 15:
@@ -47,5 +49,9 @@ while game_is_on:
         if snake.head.distance(segment) < 10:
             game_is_on = False
             scoreboard.game_over()
+
+    # increase speed every 5 points
+    if scoreboard.score % 5 == 0:
+        speed = * 0.8
 
 screen.exitonclick()
