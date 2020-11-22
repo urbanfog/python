@@ -38,6 +38,7 @@ while game_is_on:
         food.rand_location()
         snake.extend()
         scoreboard.increase_score()
+        snake_speed *= 0.98
 
     # Detect collision with wall
     if snake.head.xcor() > BOUNDARY or snake.head.xcor() < -BOUNDARY or snake.head.ycor() > BOUNDARY or snake.head.ycor() < -BOUNDARY:
@@ -50,8 +51,5 @@ while game_is_on:
             game_is_on = False
             scoreboard.game_over()
 
-    # increase speed every 5 points
-    if scoreboard.score % 5 == 0:
-        speed = * 0.8
 
 screen.exitonclick()
