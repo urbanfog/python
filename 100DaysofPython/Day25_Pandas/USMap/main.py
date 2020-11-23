@@ -27,9 +27,8 @@ while len(correct_answers) < 50:
         turd.write(state_data.State.item())
 
 
-states_to_learn = []
-for state in state_list:
-    if not state in correct_answers:
-        states_to_learn.append(state)
+states_to_learn = [
+    state for state in state_list if not state in correct_answers]
+
 states_series = pandas.Series(states_to_learn, name="States to Learn")
 states_series.to_csv("states_to_learn.csv")
