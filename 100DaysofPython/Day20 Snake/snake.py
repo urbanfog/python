@@ -14,6 +14,13 @@ class Snake:
         self.create_snake()
         self.head = self.length[0]
 
+    def reset(self):
+        for seg in self.length:
+            seg.goto(1000, 1000)
+        self.length.clear()
+        self.create_snake()
+        self.head = self.length[0]
+
     def create_snake(self):
         for _ in STARTING_POSITIONS:
             self.add_segment(_)
