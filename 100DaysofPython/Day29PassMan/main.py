@@ -2,6 +2,7 @@ from random import randint
 from tkinter import *
 from tkinter import messagebox
 import random
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
@@ -33,14 +34,53 @@ def save_password():
     site = web_input.get()
     email = email_input.get()
     pw = pw_input.get()
+    new_data = {site: {
+        "email": email,
+        "password": pw,
+    }}
     is_valid = validate(site, email, pw)
     if is_valid:
         is_ok = messagebox.askokcancel(title="Verify Your Info",
                                        message=f"These are the details entered:\nSite: {site}\nEmail: {email}\nPassword: {pw}")
         if is_ok:
-            with open("data.txt", mode="a") as file:
-                file.write(f"{site} | {email} | {pw}\n")
-            clear_entries()
+            try:
+                with open("data.json", mode="r") as file:
+                    # Reading old data
+                    data = json.load(file)
+
+            except FileNotFoundError:
+                with open("data.json", mode="w") as file:
+                    json.dump(new_data, file, indent=4)
+
+            else:
+                # Updating old data with new data in same dict
+                data.update(new_data)
+
+                with open("data.json", mode="w") as file:
+                    # Indent option makes it legible
+                    # Saving updated data
+                    json.dump(new_data, file, indent=4)
+            finally:
+                clear_entries()
+
+
+def find_password():
+    site = web_input.get()
+    try:
+        with open("data.json", mode="r") as file:
+            # Reading old data
+            data = json.load(file)
+
+    except FileNotFoundError:
+        messagebox.askokcancel(title="Log In Details",
+                               message=f"No data file found.")
+    except KeyError:
+        messagebox.askokcancel(title="Log In Details",
+                               message=f"No details for this website exists.")
+    else:
+        details = data[site]
+        messagebox.askokcancel(title="Log In Details",
+                               message=f"Email: {details['email']}\nPassword: {details['password']}")
 
 
 def validate(site, email, pw):
@@ -72,10 +112,13 @@ image = PhotoImage(file="logo.gif")
 canvas.create_image(100, 100, image=image)
 
 web_label = Label(text="Website: ")
-web_input = Entry(width=45)
+web_input = Entry(width=26)
 web_input.focus()
 web_label.grid(row=1, column=0)
-web_input.grid(row=1, column=1, columnspan=2)
+web_input.grid(row=1, column=1)
+
+search_button = Button(text="Search", width=16, command=find_password)
+search_button.grid(row=1, column=2)
 
 email_label = Label(text="Email/Username: ")
 email_input = Entry(width=45)
