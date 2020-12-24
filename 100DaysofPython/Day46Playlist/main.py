@@ -4,9 +4,14 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
 
+# Load ENV variables
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv(), override=True)
+
 # Retrieve date from user
 date = input(
-    "What date would you like to generate a playlist for? Please use yyyy-mm-dd format. ")
+    "What date would you like to generate a playlist for? Please use yyyy-mm-dd format. \n")
+playlist_title = input("What do you want to name the playlist? \n")
 
 # Scrape Billboard & generate song_title list
 response = requests.get(
@@ -23,12 +28,12 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=os.getenv("SPOTIFY_CLIE
                                                    "SPOTIFY_CLIENT_SECRET"),
                                                redirect_uri="http://example.com",
                                                scope="playlist-modify playlist-modify-private user-read-private",
-                                               show_dialog=True))
+                                               show_dialog=True, cache_path='.cache'))
 user_id = sp.current_user()['id']
 
 # Create blank playlist
 playlist = sp.user_playlist_create(user=user_id,
-                                   name=f"Billboard Top 100: {date}",
+                                   name=f"{playlist_title}",
                                    public=True,
                                    collaborative=False,
                                    description="A generated playlist from the Billboard Top 100 of a specified date.")
