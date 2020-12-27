@@ -32,10 +32,10 @@ class InternetSpeedTwitterBot:
         self.up = float(
             self.driver.find_element_by_class_name("upload-speed").text)
         print(f"Download: {self.down}, upload: {self.up}")
-        self.driver.quit()
 
     def tweet_at_provider(self):
-        if PROMISED_DOWN > self.down and PROMISED_UP > self.up:
+        time.sleep(2)
+        if PROMISED_DOWN > self.down or PROMISED_UP > self.up:
 
             self.driver.get("https://twitter.com/")
             btn = self.driver.find_element_by_link_text("Log in")
@@ -59,7 +59,7 @@ class InternetSpeedTwitterBot:
             time.sleep(2)
             text_field = self.driver.find_element_by_xpath(
                 '//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[2]/div/div[2]/div[1]/div/div/div/div[2]/div[1]/div/div/div/div/div/div/div/div/div/div[1]/div/div/div/div[2]/div/div/div/div')
-            message = f"Hey Telus, why is my internet speed {self.down}down/{self.up}up when I pay for {PROMISED_UP}up/{PROMISED_DOWN}down"
+            message = f"Hey @TELUS , why is my internet speed {self.down}down/{self.up}up when I pay for {PROMISED_UP}up/{PROMISED_DOWN}down"
             text_field.send_keys(message)
 
             time.sleep(1)
@@ -67,10 +67,13 @@ class InternetSpeedTwitterBot:
                 '//*[@id="react-root"]/div/div/div[2]/main/div/div/div/div/div/div[2]/div/div[2]/div[1]/div/div/div/div[2]/div[4]/div/div/div[2]/div[3]')
 
             tweet_button.click()
-            self.driver.quit()
+            with open("/Users/smith/python/100DaysofPython/Day51SpeedTestComplainer/log.txt", mode="a") as log:
+                log.write(f"{message}\n")
         else:
-            print(
-                f"No need to tweet. Internet speed {self.down}down/{self.up}up vs. {PROMISED_UP}up/{PROMISED_DOWN}down")
+            with open("/Users/smith/python/100DaysofPython/Day51SpeedTestComplainer/log.txt", mode="a") as file:
+                message = f"No need to tweet. Internet speed {self.down}down/{self.up}up vs. {PROMISED_UP}up/{PROMISED_DOWN}down"
+                file.write(f"{message}\n")
+        self.driver.quit()
 
 
 bot = InternetSpeedTwitterBot()
