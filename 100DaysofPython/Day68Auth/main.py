@@ -12,6 +12,11 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 # CREATE TABLE IN DB
 
 
@@ -54,7 +59,8 @@ def register():
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
+    form = LoginForm()
+    if form.validate_on_submit():
         email = request.form.get('email')
         password = request.form.get('password')
         user = User.query.filter_by(email=email).first()
