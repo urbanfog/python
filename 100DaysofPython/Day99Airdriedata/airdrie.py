@@ -3,6 +3,8 @@ from selenium.webdriver.chrome.options import Options
 import time
 from pprint import pprint
 import pandas as pd
+from bs4 import BeautifulSoup
+import re
 
 chrome_driver_path = "/Users/smith/chromedriver"
 chrome_options = Options()
@@ -11,79 +13,120 @@ chrome_options.add_experimental_option(
     "prefs", {'profile.managed_default_content_settings.javascript': 2})
 
 driver = webdriver.Chrome(executable_path=chrome_driver_path)
-filename = '/Users/smith/python/100DaysofPython/airdrie_props.csv'
+filename = '/Users/smith/python/100DaysofPython/Day99Airdriedata/airdrie_props.csv'
 
 
 roll_data = pd.read_csv(
-    '/Users/smith/python/100DaysofPython/Residential_Title_Transfers.csv')
+    '/Users/smith/python/100DaysofPython/Day99Airdriedata/Residential_Title_Transfers.csv')
+
+
+def scrape(num):
+    # Main Page Set up
+    driver.get("https://www.airdrie.ca/index.cfm?serviceID=284")
+    time.sleep(0.5)
+    field = driver.find_element_by_name('rollNumber')
+    button = driver.find_element_by_name('taxrollSubmit')
+
+    field.send_keys(num)
+    button.click()
+    time.sleep(0.5)
+    soup = BeautifulSoup(driver.page_source, 'lxml')
+
+    row = {
+        'address': "n/a",
+        'roll': "n/a",
+        'legal_desc': "n/a",
+        'assessed_value': "n/a",
+        'land_use': "n/a",
+        'classifications': "n/a",
+        'parcel_area': "n/a",
+        'year_built': "n/a",
+        'living_area_above_grade': "n/a",
+        'bldg_desc': "n/a",
+        'finished_below_grade': "n/a",
+        'garage': "n/a",
+        'deck': "n/a",
+        'veranda': "n/a",
+        'fireplace': "n/a",
+        'walkout_basement': "n/a",
+    }
+
+    # Table 1
+    row['address'] = re.sub('\s+', ' ', soup.select(
+        '#assessmentResultContainer > div > table > thead > tr > th')[0].get_text().strip())
+    row['roll'] = re.sub('\s+', ' ', soup.select(
+        '#assessmentResultContainer > div > table > tbody > tr:nth-child(1) > td')[0].get_text().strip())
+    row['legal_desc'] = re.sub('\s+', ' ', soup.select(
+        '#assessmentResultContainer > div > table > tbody > tr:nth-child(2) > td')[0].get_text().strip())
+    row['assessed_value'] = re.sub('\s+', ' ', soup.select(
+        '#assessmentResultContainer > div > table > tbody > tr:nth-child(3) > td')[0].get_text().strip())
+    row['land_use'] = re.sub('\s+', ' ', soup.select(
+        '#assessmentResultContainer > div > table > tbody > tr:nth-child(4) > td')[0].get_text().strip())
+    row['classifications'] = re.sub('\s+', ' ', soup.select(
+        '#assessmentResultContainer > div > table > tbody > tr:nth-child(5) > td')[0].get_text().strip())
+    if soup.select(
+            '#assessmentResultContainer > div > table > tbody > tr:nth-child(6) > td'):
+        row['parcel_area'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > div > table > tbody > tr:nth-child(6) > td')[0].get_text().strip())
+
+    # Table 2
+    if soup.select('#assessmentResultContainer > table > tbody > tr:nth-child(1) > th')[0].get_text() == 'Year Built':
+        row['year_built'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(1) > td')[0].get_text().strip())
+        row['living_area_above_grade'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(2) > td')[0].get_text().strip())
+        row['bldg_desc'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(3) > td')[0].get_text().strip())
+        row['finished_below_grade'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(4) > td')[0].get_text().strip())
+        row['garage'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(5) > td')[0].get_text().strip())
+        row['deck'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(6) > td')[0].get_text().strip())
+        row['veranda'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(7) > td')[0].get_text().strip())
+        row['fireplace'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(8) > td')[0].get_text().strip())
+        row['walkout_basement'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(9) > td')[0].get_text().strip())
+    elif 'Living Area' in soup.select('#assessmentResultContainer > table > tbody > tr:nth-child(1) > th')[0].get_text():
+        row['living_area_above_grade'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(1) > td')[0].get_text().strip())
+        row['bldg_desc'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(2) > td')[0].get_text().strip())
+        row['finished_below_grade'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(3) > td')[0].get_text().strip())
+        row['garage'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(4) > td')[0].get_text().strip())
+        row['deck'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(5) > td')[0].get_text().strip())
+        row['veranda'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(6) > td')[0].get_text().strip())
+        row['fireplace'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(7) > td')[0].get_text().strip())
+        row['walkout_basement'] = re.sub('\s+', ' ', soup.select(
+            '#assessmentResultContainer > table > tbody > tr:nth-child(8) > td')[0].get_text().strip())
+    else:
+        print(f"num: {num}, error")
+    return row
+
+
+def save_to_df(row):
+    print(row)
+    with open("/Users/smith/python/100DaysofPython/Day99Airdriedata/airdrie_props.csv", mode="a") as file:
+        file.write(f"{row['address']},{row['roll']},{row['legal_desc']},{row['assessed_value']},{row['land_use']},{row['classifications']},{row['parcel_area']},{row['year_built']},{row['living_area_above_grade']},{row['bldg_desc']},{row['finished_below_grade']},{row['garage']},{row['deck']},{row['veranda']},{row['fireplace']},{row['walkout_basement']}\n")
+
 
 # Update before running
-start_num = 249
+start_num = 3924
 total_num = 5689
 roll_nums = roll_data['Tax Roll'].tolist()[start_num:]
-temp_data = []
+df = pd.DataFrame()
+i = start_num
 
-
-def scrape():
-    i = start_num
-    for num in roll_nums:
-        # Main Page Set up
-        driver.get("https://www.airdrie.ca/index.cfm?serviceID=284")
-        time.sleep(0.5)
-        field = driver.find_element_by_name('rollNumber')
-        button = driver.find_element_by_name('taxrollSubmit')
-
-        field.send_keys(num)
-        button.click()
-        time.sleep(1)
-        row = {}
-        # Table 1
-        row['address'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/div/table/thead/tr/th').text
-        row['roll'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/div/table/tbody/tr[1]/td').text
-        row['legal_desc'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/div/table/tbody/tr[2]/td').text
-        row['assessed_value'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/div/table/tbody/tr[3]/td').text
-        row['land_use.append'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/div/table/tbody/tr[4]/td').text
-        row['classifications'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/div/table/tbody/tr[5]/td').text
-        row['parcel_area'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/div/table/tbody/tr[6]/td').text
-
-        # Table 2
-        row['year_built'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[1]/td').text
-        row['living_area_above_grade'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[2]/td').text
-        row['bldg_desc.append'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[3]/td').text
-        row['finished_below_grade'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[4]/td').text
-        row['garage'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[5]/td').text
-        row['deck'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[6]/td').text
-        row['veranda'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[7]/td').text
-        row['fireplace'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[8]/td').text
-        row['walkout_basement'] = driver.find_element_by_xpath(
-            '//*[@id="assessmentResultContainer"]/table/tbody/tr[9]/td').text
-        temp_data.append(row)
-        time.sleep(1)
-        i += 1
-        print(f"{i} of {total_num}")
-    driver.quit()
-
-
-def save_to_df():
-    # Create Dataframe
-    df = pd.DataFrame(temp_data)
-    df.to_csv("airdrie_props.csv")
-
-
-scrape()
-save_to_df()
+for num in roll_nums:
+    print(num)
+    row = scrape(num)
+    save_to_df(row)
+    i += 1
+    print(f"{i} of {total_num}")
