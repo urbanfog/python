@@ -107,7 +107,7 @@ def scrape(num):
         row['walkout_basement'] = re.sub('\s+', ' ', soup.select(
             '#assessmentResultContainer > table > tbody > tr:nth-child(8) > td')[0].get_text().strip())
     else:
-        print(f"num: {num}, error")
+        print(f"num: {num}, error")Í
     return row
 
 
