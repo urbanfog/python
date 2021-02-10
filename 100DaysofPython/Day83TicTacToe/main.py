@@ -1,6 +1,8 @@
 from gameboard import Gameboard
 from player import Player
 
+# Pseudo Game class
+
 # initialize
 board = Gameboard()
 p1 = Player('X')
